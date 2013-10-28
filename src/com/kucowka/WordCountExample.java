@@ -14,7 +14,6 @@ import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
-import org.apache.hadoop.mapred.KeyValueTextInputFormat;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -90,6 +89,9 @@ public class WordCountExample extends Configured implements Tool {
 		
 		jobConf.setOutputKeyClass(Text.class);
 		jobConf.setOutputValueClass(IntWritable.class);
+		
+		jobConf.setNumMapTasks(5);
+		jobConf.setNumReduceTasks(3);
 		
 		JobClient.runJob(jobConf);
 		
