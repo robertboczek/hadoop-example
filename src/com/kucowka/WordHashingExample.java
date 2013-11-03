@@ -1,13 +1,11 @@
 package com.kucowka;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.StringTokenizer;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.conf.Configured;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
@@ -18,10 +16,8 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.TextInputFormat;
-import org.apache.hadoop.mapred.TextOutputFormat;
 import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
@@ -49,7 +45,8 @@ public class WordHashingExample extends Configured implements Tool {
 	public static class PartitionByFirstLetter 
 		extends MultipleTextOutputFormat<NullWritable, Text> {
 		
-		public String generateFileNameForKey(NullWritable key, Text value, String fileName) {
+		@Override
+		protected String generateFileNameForKeyValue(NullWritable key, Text value, String fileName) {
 			Character c = Character.toLowerCase(value.toString().charAt(0));
 			String prefix = null;
 			if (c.compareTo('a') >= 0 && c.compareTo('z') <= 0) {
@@ -89,7 +86,6 @@ public class WordHashingExample extends Configured implements Tool {
 		jobConf.setOutputKeyClass(NullWritable.class);
 		jobConf.setOutputValueClass(Text.class);
 		
-		jobConf.setNumMapTasks(4);
 		jobConf.setNumReduceTasks(0);
 		
 		JobClient.runJob(jobConf);
