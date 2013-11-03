@@ -72,7 +72,7 @@ public class WordHashingExample extends Configured implements Tool {
 	public int run(String[] args) throws Exception {
 		Configuration conf = getConf();
 		
-		JobConf jobConf = new JobConf(conf, WordCountExample.class);
+		JobConf jobConf = new JobConf(conf, WordHashingExample.class);
 		
 		Path in = new Path(args[0]);
 		Path out = new Path(args[1]);
@@ -80,15 +80,14 @@ public class WordHashingExample extends Configured implements Tool {
 		FileInputFormat.setInputPaths(jobConf, in);
 		FileOutputFormat.setOutputPath(jobConf, out);
 		
-		jobConf.setJobName("WordCount");
+		jobConf.setJobName("WordHashing");
 		jobConf.setMapperClass(MapClass2.class);
 		
 		jobConf.setInputFormat(TextInputFormat.class);
 		jobConf.setOutputFormat(PartitionByFirstLetter.class);
-		jobConf.set("textoutputformat.separator", " : ");
 		
-		jobConf.setOutputKeyClass(Text.class);
-		jobConf.setOutputValueClass(IntWritable.class);
+		jobConf.setOutputKeyClass(NullWritable.class);
+		jobConf.setOutputValueClass(Text.class);
 		
 		jobConf.setNumMapTasks(4);
 		jobConf.setNumReduceTasks(0);
