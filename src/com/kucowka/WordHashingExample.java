@@ -64,7 +64,7 @@ public class WordHashingExample extends Configured implements Tool {
 	
 	public static void main(String[] args) throws Exception {
 
-		int result = ToolRunner.run(new Configuration(), new WordCountExample(), args);
+		int result = ToolRunner.run(new Configuration(), new WordHashingExample(), args);
 		System.exit(result);
 	}
 	
