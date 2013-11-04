@@ -42,10 +42,7 @@ public class WordCountExample extends Configured implements Tool {
 			super.configure(job);
 			try {
 				BufferedReader bf = new BufferedReader(new FileReader(f));
-				String line = null;
-				while ((line = bf.readLine()) != null) {
-					additionalLine = line;
-				}
+				additionalLine = bf.readLine();
 				bf.close();
 			} catch (IOException e) {
 				throw new RuntimeException(e);
