@@ -1,5 +1,8 @@
 package com.kucowka;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.StringTokenizer;
@@ -26,17 +29,40 @@ import org.apache.hadoop.util.ToolRunner;
 
 public class WordCountExample extends Configured implements Tool {
 
-	public static class MapClass extends MapReduceBase
-		implements Mapper<LongWritable, Text, Text, IntWritable> {
-		
+	public static class MapClass extends MapReduceBase implements
+			Mapper<LongWritable, Text, Text, IntWritable> {
+
 		private final static IntWritable one = new IntWritable(1);
 		private Text word = new Text();
+		private static File f = new File("/tmp/file.txt");
+		private String additionalLine = "";
+		
+		@Override
+		public void configure(JobConf job) {
+			super.configure(job);
+			try {
+				BufferedReader bf = new BufferedReader(new FileReader(f));
+				String line = null;
+				while ((line = bf.readLine()) != null) {
+					additionalLine = line;
+				}
+				bf.close();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 
 		@Override
 		public void map(LongWritable key, Text value,
 				OutputCollector<Text, IntWritable> output, Reporter reporter)
 				throws IOException {
 			String line = value.toString();
+			parseLineAndPublish(line, output);
+			parseLineAndPublish(additionalLine, output);
+		}
+
+		private void parseLineAndPublish(String line,
+				OutputCollector<Text, IntWritable> output) throws IOException {
 			StringTokenizer tokenizer = new StringTokenizer(line);
 			while (tokenizer.hasMoreTokens()) {
 				word.set(tokenizer.nextToken());
@@ -44,9 +70,9 @@ public class WordCountExample extends Configured implements Tool {
 			}
 		}
 	}
-	
-	public static class Reduce extends MapReduceBase 
-		implements Reducer<Text, IntWritable, Text, IntWritable> {
+
+	public static class Reduce extends MapReduceBase implements
+			Reducer<Text, IntWritable, Text, IntWritable> {
 
 		@Override
 		public void reduce(Text key, Iterator<IntWritable> values,
@@ -59,42 +85,43 @@ public class WordCountExample extends Configured implements Tool {
 			output.collect(key, new IntWritable(sum));
 		}
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 
-		int result = ToolRunner.run(new Configuration(), new WordCountExample(), args);
-		
+		int result = ToolRunner.run(new Configuration(),
+				new WordCountExample(), args);
+
 		System.exit(result);
 	}
-	
+
 	@Override
 	public int run(String[] args) throws Exception {
 		Configuration conf = getConf();
-		
+
 		JobConf jobConf = new JobConf(conf, WordCountExample.class);
-		
+
 		Path in = new Path(args[0]);
 		Path out = new Path(args[1]);
-		
+
 		FileInputFormat.setInputPaths(jobConf, in);
 		FileOutputFormat.setOutputPath(jobConf, out);
-		
+
 		jobConf.setJobName("WordCount");
 		jobConf.setMapperClass(MapClass.class);
 		jobConf.setReducerClass(Reduce.class);
-		
+
 		jobConf.setInputFormat(TextInputFormat.class);
 		jobConf.setOutputFormat(TextOutputFormat.class);
 		jobConf.set("textoutputformat.separator", " : ");
-		
+
 		jobConf.setOutputKeyClass(Text.class);
 		jobConf.setOutputValueClass(IntWritable.class);
-		
+
 		jobConf.setNumMapTasks(5);
 		jobConf.setNumReduceTasks(3);
-		
+
 		JobClient.runJob(jobConf);
-		
+
 		return 0;
 	}
 

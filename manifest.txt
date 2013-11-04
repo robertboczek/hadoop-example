@@ -1,2 +1,2 @@
-Main-Class: com.kucowka.WordHashingExample
+Main-Class: com.kucowka.WordCountExample
 
